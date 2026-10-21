@@ -723,11 +723,19 @@ class _ContactScreenState extends State<ContactScreen> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
+              isExpanded: true,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.category_outlined, size: 20),
               ),
               items: _categories
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c, style: GoogleFonts.inter(fontSize: 14))))
+                  .map((c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(
+                          c,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      ))
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _selectedCategory = v);

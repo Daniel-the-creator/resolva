@@ -24,7 +24,7 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isMobileView = width < 960;
+    final isMobileView = width < 1100;
     final authController = Get.find<AuthController>();
 
     return Container(
@@ -43,7 +43,7 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: AppConstants.maxContentWidth + 48),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 // Logo
@@ -55,24 +55,32 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
                     onPressed: onMenuTap ?? () => Scaffold.of(context).openDrawer(),
                   ),
                 ] else ...[
-                  const SizedBox(width: 48),
-                  // Nav links
-                  _buildNavItem('Home', 0, '/'),
-                  _buildNavItem('Examination E-Pins', 1, '/exam-pins'),
-                  _buildNavItem('Social Media', 2, '/social-media'),
-                  _buildNavItem('CAC Registration', 3, '/cac'),
-                  Obx(() {
-                    if (authController.isFullyAuthorized) {
-                      return _buildNavItem('Dashboard', 4, '/dashboard');
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                  const Spacer(),
-                  // Actions (Reactive based on auth status)
-                  Obx(() {
-                    if (authController.isFullyAuthorized) {
-                      return Row(
+                  const SizedBox(width: 24),
+                  // Nav links wrapped in Flexible SingleChildScrollView to prevent overflow on any desktop width
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
+                          _buildNavItem('Home', 0, '/'),
+                          _buildNavItem('Examination E-Pins', 1, '/exam-pins'),
+                          _buildNavItem('Social Media', 2, '/social-media'),
+                          _buildNavItem('CAC Registration', 3, '/cac'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Single consolidated reactive section
+                  Obx(() {
+                    final isAuth = authController.isFullyAuthorized;
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isAuth) ...[
+                          _buildNavItem('Dashboard', 4, '/dashboard'),
+                          const SizedBox(width: 12),
                           OutlinedButton.icon(
                             onPressed: () {
                               authController.logout();
@@ -89,44 +97,30 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.textPrimary,
                               side: const BorderSide(color: AppColors.cardBorder),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            ),
+                          ),
+                        ] else ...[
+                          TextButton(
+                            onPressed: () => onNavigate('/login'),
+                            child: Text(
+                              'Login',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
-                          ElevatedButton.icon(
-                            onPressed: () => onNavigate('/dashboard'),
-                            icon: const Icon(Icons.dashboard_rounded, size: 16),
-                            label: const Text('Dashboard'),
+                          ElevatedButton(
+                            onPressed: () => onNavigate('/register'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.royalBlue,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                             ),
+                            child: const Text('Get Started'),
                           ),
                         ],
-                      );
-                    }
-
-                    return Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => onNavigate('/login'),
-                          child: Text(
-                            'Login',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () => onNavigate('/register'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          ),
-                          child: const Text('Get Started'),
-                        ),
                       ],
                     );
                   }),

@@ -18,7 +18,7 @@ class ExamPinsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ExamController());
+    final controller = Get.find<ExamController>();
     final width = MediaQuery.of(context).size.width;
     final isMobileView = isMobile(width);
 

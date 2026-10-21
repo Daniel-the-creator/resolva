@@ -16,19 +16,30 @@ class CreatePinScreen extends StatefulWidget {
 }
 
 class _CreatePinScreenState extends State<CreatePinScreen> {
-  late final OnboardingController onboardingController;
+  String _pin = '';
 
-  @override
-  void initState() {
-    super.initState();
-    onboardingController = Get.find<OnboardingController>();
-    onboardingController.resetAll();
+  void _onDigit(String d) {
+    if (_pin.length < 6) {
+      setState(() => _pin += d);
+    }
+  }
+
+  void _onDelete() {
+    if (_pin.isNotEmpty) {
+      setState(() => _pin = _pin.substring(0, _pin.length - 1));
+    }
+  }
+
+  void _onClear() {
+    if (_pin.isNotEmpty) {
+      setState(() => _pin = '');
+    }
   }
 
   void _handleContinue() {
-    if (onboardingController.pinInput.value.length == 6) {
-      onboardingController.tempCreatedPin.value = onboardingController.pinInput.value;
-      onboardingController.pinInput.value = '';
+    if (_pin.length == 6) {
+      final onboardingController = Get.find<OnboardingController>();
+      onboardingController.tempCreatedPin = _pin;
       widget.onNavigate('/confirm-pin');
     }
   }
@@ -110,64 +121,39 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                     const SizedBox(height: 32),
 
                     // Six-digit masked indicators
-                    Obx(
-                      () => PinIndicators(
-                        length: onboardingController.pinInput.value.length,
-                        hasError: onboardingController.errorMessage.value.isNotEmpty,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Inline error text (if any)
-                    Obx(() {
-                      if (onboardingController.errorMessage.value.isEmpty) {
-                        return const SizedBox(height: 18);
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          onboardingController.errorMessage.value,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.error,
-                          ),
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-
-                    // Numeric Keypad
-                    NumericKeypad(
-                      onDigitPressed: onboardingController.appendDigit,
-                      onDeletePressed: onboardingController.deleteDigit,
-                      onClearPressed: onboardingController.clearDigits,
+                    PinIndicators(
+                      length: _pin.length,
+                      hasError: false,
                     ),
                     const SizedBox(height: 28),
 
-                    // Continue button (only active when 6 digits entered)
-                    Obx(() {
-                      final isComplete = onboardingController.pinInput.value.length == 6;
-                      return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isComplete ? _handleContinue : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            disabledBackgroundColor: AppColors.cardBorder,
-                          ),
-                          child: Text(
-                            'Continue',
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    // Numeric Keypad
+                    NumericKeypad(
+                      onDigitPressed: _onDigit,
+                      onDeletePressed: _onDelete,
+                      onClearPressed: _onClear,
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Continue button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _pin.length == 6 ? _handleContinue : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: AppColors.cardBorder,
+                        ),
+                        child: Text(
+                          'Continue',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                   ],
                 ),
               ),

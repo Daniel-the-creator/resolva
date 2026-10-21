@@ -19,7 +19,7 @@ class SocialMediaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SocialController());
+    final controller = Get.find<SocialController>();
     final width = MediaQuery.of(context).size.width;
     final isMobileView = isMobile(width);
 

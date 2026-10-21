@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    controller = Get.put(DashboardController());
+    controller = Get.find<DashboardController>();
     _selectedTab = widget.initialTab;
   }
 
@@ -329,12 +329,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Icon(Icons.support_agent_rounded, size: 20, color: AppColors.royalBlue),
                     const SizedBox(width: 8),
-                    Text(
-                      'Direct Support',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryNavy,
+                    Flexible(
+                      child: Text(
+                        'Direct Support',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryNavy,
+                        ),
                       ),
                     ),
                   ],
@@ -482,14 +485,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
+              const SizedBox(width: 4),
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

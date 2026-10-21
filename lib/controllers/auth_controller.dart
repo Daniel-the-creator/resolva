@@ -37,8 +37,8 @@ class AuthController extends GetxController {
   // Security PIN setup (6 digits)
   final securityPin = ''.obs;
 
-  // Redirect destination after completing auth/onboarding
-  final intendedRoute = ''.obs;
+  // Redirect destination after completing auth/onboarding (internal state, non-observable)
+  String intendedRoute = '';
 
   // Registered user demo profile
   final userFullName = 'Demo User'.obs;
@@ -72,8 +72,8 @@ class AuthController extends GetxController {
     if (!isSessionUnlocked.value) {
       return '/verify-pin';
     }
-    final target = intendedRoute.value.isNotEmpty ? intendedRoute.value : '/dashboard';
-    intendedRoute.value = '';
+    final target = intendedRoute.isNotEmpty ? intendedRoute : '/dashboard';
+    intendedRoute = '';
     return target;
   }
 
@@ -187,7 +187,7 @@ class AuthController extends GetxController {
   void logout() {
     isLoggedIn.value = false;
     isSessionUnlocked.value = false;
-    intendedRoute.value = '';
+    intendedRoute = '';
     loginPassword.value = '';
   }
 }

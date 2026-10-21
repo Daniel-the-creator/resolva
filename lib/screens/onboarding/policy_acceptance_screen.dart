@@ -227,13 +227,13 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: isMobile ? 24 : 48,
+              horizontal: isMobile ? 16 : 24,
+              vertical: isMobile ? 20 : 48,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 620),
               child: Container(
-                padding: EdgeInsets.all(isMobile ? 24 : 40),
+                padding: EdgeInsets.all(isMobile ? 18 : 40),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -440,6 +440,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -451,48 +452,59 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Row(
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryNavy,
-                      ),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryNavy,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.royalBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            version,
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.royalBlue,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.royalBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                    TextButton(
+                      onPressed: onRead,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
-                        version,
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                        buttonLabel,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.royalBlue,
                         ),
                       ),
                     ),
                   ],
-                ),
-              ),
-              TextButton(
-                onPressed: onRead,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  visualDensity: VisualDensity.compact,
-                ),
-                child: Text(
-                  buttonLabel,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.royalBlue,
-                  ),
                 ),
               ),
             ],

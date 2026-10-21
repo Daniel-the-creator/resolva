@@ -131,13 +131,16 @@ class _CacScreenState extends State<CacScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        'UPCOMING SERVICE • LAUNCHING SOON',
-                        style: GoogleFonts.inter(
-                          color: AppColors.accentGold,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
+                      Flexible(
+                        child: Text(
+                          'UPCOMING SERVICE • LAUNCHING SOON',
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: AppColors.accentGold,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
                     ],
@@ -243,13 +246,18 @@ class _CacScreenState extends State<CacScreen> {
                     ],
                   )
                 : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatItem('100% Accredited', 'Certified CAC filing agents'),
+                      Expanded(
+                        child: _buildStatItem('100% Accredited', 'Certified CAC filing agents'),
+                      ),
                       Container(height: 40, width: 1, color: Colors.white12),
-                      _buildStatItem('3-7 Days', 'Average turnaround timeline'),
+                      Expanded(
+                        child: _buildStatItem('3-7 Days', 'Average turnaround timeline'),
+                      ),
                       Container(height: 40, width: 1, color: Colors.white12),
-                      _buildStatItem('Zero Hidden Fees', 'Transparent government & filing tariffs'),
+                      Expanded(
+                        child: _buildStatItem('Zero Hidden Fees', 'Transparent government & filing tariffs'),
+                      ),
                     ],
                   ),
           ),
@@ -263,6 +271,7 @@ class _CacScreenState extends State<CacScreen> {
       children: [
         Text(
           title,
+          textAlign: TextAlign.center,
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -272,6 +281,7 @@ class _CacScreenState extends State<CacScreen> {
         const SizedBox(height: 4),
         Text(
           subtitle,
+          textAlign: TextAlign.center,
           style: GoogleFonts.inter(
             fontSize: 13,
             color: AppColors.textSecondaryDark,
@@ -472,12 +482,15 @@ class _CacScreenState extends State<CacScreen> {
                   children: [
                     const Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
                     const SizedBox(width: 4),
-                    Text(
-                      pkg['duration'] as String,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textMuted,
+                    Flexible(
+                      child: Text(
+                        pkg['duration'] as String,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ),
                   ],
@@ -1111,8 +1124,10 @@ class _CacScreenState extends State<CacScreen> {
           ),
         ),
         const SizedBox(height: 28),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 16,
+          runSpacing: 12,
           children: [
             OutlinedButton(
               onPressed: () {
@@ -1126,7 +1141,6 @@ class _CacScreenState extends State<CacScreen> {
               },
               child: const Text('Register Another Business'),
             ),
-            const SizedBox(width: 16),
             ElevatedButton(
               onPressed: () => widget.onNavigate('/exam-pins'),
               child: const Text('Explore E-Pins'),

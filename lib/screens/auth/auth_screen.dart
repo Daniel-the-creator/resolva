@@ -140,14 +140,14 @@ class _AuthScreenState extends State<AuthScreen> {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: isMobileView ? 40 : 64,
+                      horizontal: isMobileView ? 16 : 24,
+                      vertical: isMobileView ? 24 : 64,
                     ),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 480),
                         child: Container(
-                          padding: EdgeInsets.all(isMobileView ? 24 : 36),
+                          padding: EdgeInsets.all(isMobileView ? 20 : 36),
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
@@ -294,20 +294,23 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ),
                                 child: Column(
                                   children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.flash_on_rounded, size: 16, color: AppColors.accentGold),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Demo Test Accounts',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.primaryNavy,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.flash_on_rounded, size: 16, color: AppColors.accentGold),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Demo Test Accounts',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.primaryNavy,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(height: 10),
                                     Row(
@@ -405,18 +408,25 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Obx(
                     () => Checkbox(
                       value: controller.rememberMe.value,
                       onChanged: (v) => controller.rememberMe.value = v ?? false,
                       activeColor: AppColors.royalBlue,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
                     ),
                   ),
+                  const SizedBox(width: 4),
                   Text(
                     'Remember me',
                     style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
@@ -425,6 +435,11 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               TextButton(
                 onPressed: () => widget.onNavigate('/forgot-password'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 child: Text(
                   'Forgot password?',
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),

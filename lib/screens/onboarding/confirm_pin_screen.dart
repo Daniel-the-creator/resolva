@@ -17,27 +17,49 @@ class ConfirmPinScreen extends StatefulWidget {
 }
 
 class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
-  late final AuthController authController;
-  late final OnboardingController onboardingController;
+  String _pin = '';
+  String _errorMessage = '';
 
-  @override
-  void initState() {
-    super.initState();
-    authController = Get.find<AuthController>();
-    onboardingController = Get.find<OnboardingController>();
-    onboardingController.pinInput.value = '';
-    onboardingController.errorMessage.value = '';
+  void _onDigit(String d) {
+    if (_pin.length < 6) {
+      setState(() {
+        _errorMessage = '';
+        _pin += d;
+      });
+      if (_pin.length == 6) {
+        _handleConfirm();
+      }
+    }
+  }
+
+  void _onDelete() {
+    if (_pin.isNotEmpty) {
+      setState(() {
+        _errorMessage = '';
+        _pin = _pin.substring(0, _pin.length - 1);
+      });
+    }
+  }
+
+  void _onClear() {
+    if (_pin.isNotEmpty) {
+      setState(() {
+        _errorMessage = '';
+        _pin = '';
+      });
+    }
   }
 
   void _handleConfirm() async {
-    final entered = onboardingController.pinInput.value;
-    final expected = onboardingController.tempCreatedPin.value;
+    final onboardingController = Get.find<OnboardingController>();
+    final expected = onboardingController.tempCreatedPin;
 
-    if (entered.length != 6) return;
+    if (_pin.length != 6) return;
 
-    if (entered == expected) {
+    if (_pin == expected) {
       // PIN Setup Successful!
-      authController.setSecurityPin(entered);
+      final authController = Get.find<AuthController>();
+      authController.setSecurityPin(_pin);
       onboardingController.resetAll();
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -49,15 +71,17 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
       );
 
       // Navigate to originally requested service or dashboard
-      final destination = authController.intendedRoute.value.isNotEmpty
-          ? authController.intendedRoute.value
+      final destination = authController.intendedRoute.isNotEmpty
+          ? authController.intendedRoute
           : '/dashboard';
-      authController.intendedRoute.value = '';
+      authController.intendedRoute = '';
       widget.onNavigate(destination);
     } else {
       // Mismatch
-      onboardingController.setErrorMessage('PINs do not match. Please try again.');
-      onboardingController.pinInput.value = '';
+      setState(() {
+        _errorMessage = 'PINs do not match. Please try again.';
+        _pin = '';
+      });
     }
   }
 
@@ -138,23 +162,18 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                     const SizedBox(height: 32),
 
                     // Six-digit masked indicators
-                    Obx(
-                      () => PinIndicators(
-                        length: onboardingController.pinInput.value.length,
-                        hasError: onboardingController.errorMessage.value.isNotEmpty,
-                      ),
+                    PinIndicators(
+                      length: _pin.length,
+                      hasError: _errorMessage.isNotEmpty,
                     ),
                     const SizedBox(height: 12),
 
                     // Inline error text
-                    Obx(() {
-                      if (onboardingController.errorMessage.value.isEmpty) {
-                        return const SizedBox(height: 18);
-                      }
-                      return Padding(
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          onboardingController.errorMessage.value,
+                          _errorMessage,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 13,
@@ -162,45 +181,39 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                             color: AppColors.error,
                           ),
                         ),
-                      );
-                    }),
+                      )
+                    else
+                      const SizedBox(height: 18),
+
                     const SizedBox(height: 8),
 
                     // Numeric Keypad
                     NumericKeypad(
-                      onDigitPressed: (d) {
-                        onboardingController.appendDigit(d);
-                        if (onboardingController.pinInput.value.length == 6) {
-                          _handleConfirm();
-                        }
-                      },
-                      onDeletePressed: onboardingController.deleteDigit,
-                      onClearPressed: onboardingController.clearDigits,
+                      onDigitPressed: _onDigit,
+                      onDeletePressed: _onDelete,
+                      onClearPressed: _onClear,
                     ),
                     const SizedBox(height: 28),
 
                     // Confirm button
-                    Obx(() {
-                      final isComplete = onboardingController.pinInput.value.length == 6;
-                      return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isComplete ? _handleConfirm : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            disabledBackgroundColor: AppColors.cardBorder,
-                          ),
-                          child: Text(
-                            'Confirm Security PIN',
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _pin.length == 6 ? _handleConfirm : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: AppColors.cardBorder,
+                        ),
+                        child: Text(
+                          'Confirm Security PIN',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                     const SizedBox(height: 12),
 
                     // Back / Change PIN option

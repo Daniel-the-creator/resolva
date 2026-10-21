@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../controllers/auth_controller.dart';
-import '../../controllers/onboarding_controller.dart';
 import '../../widgets/shared/numeric_keypad.dart';
 
 /// Screen for returning users to verify their 6-digit Security PIN before accessing protected services.
@@ -17,26 +16,46 @@ class VerifyPinScreen extends StatefulWidget {
 }
 
 class _VerifyPinScreenState extends State<VerifyPinScreen> {
-  late final AuthController authController;
-  late final OnboardingController onboardingController;
+  String _pin = '';
+  String _errorMessage = '';
 
-  @override
-  void initState() {
-    super.initState();
-    authController = Get.find<AuthController>();
-    onboardingController = Get.find<OnboardingController>();
-    onboardingController.pinInput.value = '';
-    onboardingController.errorMessage.value = '';
+  void _onDigit(String d) {
+    if (_pin.length < 6) {
+      setState(() {
+        _errorMessage = '';
+        _pin += d;
+      });
+      if (_pin.length == 6) {
+        _handleVerify();
+      }
+    }
+  }
+
+  void _onDelete() {
+    if (_pin.isNotEmpty) {
+      setState(() {
+        _errorMessage = '';
+        _pin = _pin.substring(0, _pin.length - 1);
+      });
+    }
+  }
+
+  void _onClear() {
+    if (_pin.isNotEmpty) {
+      setState(() {
+        _errorMessage = '';
+        _pin = '';
+      });
+    }
   }
 
   void _handleVerify() async {
-    final entered = onboardingController.pinInput.value;
-    if (entered.length != 6) return;
+    if (_pin.length != 6) return;
 
-    final isValid = authController.verifyPin(entered);
+    final authController = Get.find<AuthController>();
+    final isValid = authController.verifyPin(_pin);
 
     if (isValid) {
-      onboardingController.resetAll();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('PIN verified. Access granted!'),
@@ -46,14 +65,16 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
       );
 
       // Navigate to originally intended service or customer dashboard
-      final destination = authController.intendedRoute.value.isNotEmpty
-          ? authController.intendedRoute.value
+      final destination = authController.intendedRoute.isNotEmpty
+          ? authController.intendedRoute
           : '/dashboard';
-      authController.intendedRoute.value = '';
+      authController.intendedRoute = '';
       widget.onNavigate(destination);
     } else {
-      onboardingController.setErrorMessage('Incorrect PIN. Please try again.');
-      onboardingController.pinInput.value = '';
+      setState(() {
+        _errorMessage = 'Incorrect PIN. Please try again.';
+        _pin = '';
+      });
     }
   }
 
@@ -68,13 +89,13 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: isMobile ? 24 : 40,
+              horizontal: isMobile ? 16 : 24,
+              vertical: isMobile ? 20 : 40,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Container(
-                padding: EdgeInsets.all(isMobile ? 24 : 36),
+                padding: EdgeInsets.all(isMobile ? 18 : 36),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -134,23 +155,18 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                     const SizedBox(height: 32),
 
                     // Six-digit masked indicators
-                    Obx(
-                      () => PinIndicators(
-                        length: onboardingController.pinInput.value.length,
-                        hasError: onboardingController.errorMessage.value.isNotEmpty,
-                      ),
+                    PinIndicators(
+                      length: _pin.length,
+                      hasError: _errorMessage.isNotEmpty,
                     ),
                     const SizedBox(height: 12),
 
                     // Inline error text
-                    Obx(() {
-                      if (onboardingController.errorMessage.value.isEmpty) {
-                        return const SizedBox(height: 18);
-                      }
-                      return Padding(
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          onboardingController.errorMessage.value,
+                          _errorMessage,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 13,
@@ -158,56 +174,59 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                             color: AppColors.error,
                           ),
                         ),
-                      );
-                    }),
+                      )
+                    else
+                      const SizedBox(height: 18),
+
                     const SizedBox(height: 8),
 
                     // Numeric Keypad
                     NumericKeypad(
-                      onDigitPressed: (d) {
-                        onboardingController.appendDigit(d);
-                        if (onboardingController.pinInput.value.length == 6) {
-                          _handleVerify();
-                        }
-                      },
-                      onDeletePressed: onboardingController.deleteDigit,
-                      onClearPressed: onboardingController.clearDigits,
+                      onDigitPressed: _onDigit,
+                      onDeletePressed: _onDelete,
+                      onClearPressed: _onClear,
                     ),
                     const SizedBox(height: 24),
 
                     // Confirm button
-                    Obx(() {
-                      final isComplete = onboardingController.pinInput.value.length == 6;
-                      return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isComplete ? _handleVerify : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            disabledBackgroundColor: AppColors.cardBorder,
-                          ),
-                          child: Text(
-                            'Confirm',
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _pin.length == 6 ? _handleVerify : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: AppColors.cardBorder,
+                        ),
+                        child: Text(
+                          'Confirm',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                     const SizedBox(height: 16),
 
-                    // Forgot PIN & Logout links
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Forgot PIN & Logout links wrapped to prevent overflow
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         TextButton(
                           onPressed: () {
+                            final authController = Get.find<AuthController>();
                             authController.logout();
                             widget.onNavigate('/login');
                           },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: Text(
                             'Switch Account',
                             style: GoogleFonts.inter(
@@ -219,6 +238,11 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                         ),
                         TextButton(
                           onPressed: () => widget.onNavigate('/forgot-pin'),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: Text(
                             'Forgot PIN?',
                             style: GoogleFonts.inter(

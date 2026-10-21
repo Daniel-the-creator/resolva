@@ -46,13 +46,13 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
       _isLoading = false;
       _codeSent = true;
       _errorText = '';
-      _codeController.text = onboardingController.demoRecoveryCode.value; // Convenience auto-fill for demo
+      _codeController.text = onboardingController.demoRecoveryCode; // Convenience auto-fill for demo
     });
   }
 
   void _verifyRecoveryCode() async {
     final entered = _codeController.text.trim();
-    if (entered != onboardingController.demoRecoveryCode.value) {
+    if (entered != onboardingController.demoRecoveryCode) {
       setState(() {
         _errorText = 'Invalid recovery code. Please check and retry.';
       });
@@ -227,7 +227,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Demo Code sent! Your verification code is: ${onboardingController.demoRecoveryCode.value}',
+                                'Demo Code sent! Your verification code is: ${onboardingController.demoRecoveryCode}',
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,

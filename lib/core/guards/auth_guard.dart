@@ -18,7 +18,7 @@ class AuthGuard extends GetMiddleware {
           route.isNotEmpty &&
           route != '/login' &&
           route != '/register') {
-        authController.intendedRoute.value = route;
+        authController.intendedRoute = route;
       }
       return const RouteSettings(name: '/login');
     }
@@ -28,7 +28,7 @@ class AuthGuard extends GetMiddleware {
       if (route != null &&
           route.isNotEmpty &&
           route != '/policy-acceptance') {
-        authController.intendedRoute.value = route;
+        authController.intendedRoute = route;
       }
       return const RouteSettings(name: '/policy-acceptance');
     }
@@ -39,7 +39,7 @@ class AuthGuard extends GetMiddleware {
           route.isNotEmpty &&
           route != '/create-pin' &&
           route != '/confirm-pin') {
-        authController.intendedRoute.value = route;
+        authController.intendedRoute = route;
       }
       return const RouteSettings(name: '/create-pin');
     }
@@ -50,7 +50,7 @@ class AuthGuard extends GetMiddleware {
           route.isNotEmpty &&
           route != '/verify-pin' &&
           route != '/forgot-pin') {
-        authController.intendedRoute.value = route;
+        authController.intendedRoute = route;
       }
       return const RouteSettings(name: '/verify-pin');
     }

@@ -178,18 +178,20 @@ class ResolvaFooter extends StatelessWidget {
             children: [
               Text(
                 '© 2024 RESOLVA. All rights reserved.',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   color: const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 16,
+                runSpacing: 6,
                 children: [
-                  _legalLink('Privacy Policy'),
-                  const SizedBox(width: 16),
-                  _legalLink('Terms of Service'),
+                  _legalLink('Privacy Policy', '/privacy-policy'),
+                  _legalLink('Terms of Service', '/terms-of-service'),
                 ],
               ),
             ],
@@ -207,24 +209,27 @@ class ResolvaFooter extends StatelessWidget {
                   color: const Color(0xFF64748B),
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                spacing: 24,
+                runSpacing: 6,
                 children: [
-                  _legalLink('Privacy Policy'),
-                  const SizedBox(width: 24),
-                  _legalLink('Terms of Service'),
+                  _legalLink('Privacy Policy', '/privacy-policy'),
+                  _legalLink('Terms of Service', '/terms-of-service'),
                 ],
               ),
             ],
           );
   }
 
-  Widget _legalLink(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(
-        fontSize: 13,
-        color: const Color(0xFF64748B),
+  Widget _legalLink(String label, String route) {
+    return InkWell(
+      onTap: () => onNavigate(route),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 13,
+          color: const Color(0xFF64748B),
+        ),
       ),
     );
   }

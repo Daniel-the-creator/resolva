@@ -122,12 +122,15 @@ class _HeroSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Digital Services Platform',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white.withValues(alpha: 0.9),
+              Flexible(
+                child: Text(
+                  'Digital Services Platform',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white.withValues(alpha: 0.9),
+                  ),
                 ),
               ),
             ],
@@ -528,7 +531,7 @@ class _WhyChooseSection extends StatelessWidget {
                 const SizedBox(height: 48),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final crossCount = constraints.maxWidth < 500 ? 1 : (constraints.maxWidth < 800 ? 2 : 3);
+                    final crossCount = constraints.maxWidth < 600 ? 1 : (constraints.maxWidth < 900 ? 2 : 3);
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -536,7 +539,7 @@ class _WhyChooseSection extends StatelessWidget {
                         crossAxisCount: crossCount,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
-                        childAspectRatio: crossCount == 1 ? 3 : 1.8,
+                        mainAxisExtent: crossCount == 1 ? 165 : 190,
                       ),
                       itemCount: reasons.length,
                       itemBuilder: (context, index) => _buildReasonCard(reasons[index]),
