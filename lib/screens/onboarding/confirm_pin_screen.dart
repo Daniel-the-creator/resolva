@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/onboarding_controller.dart';
+import '../../widgets/shared/common_widgets.dart';
 import '../../widgets/shared/numeric_keypad.dart';
 
 /// Step 2 of Security PIN setup: Re-enter and verify the 6-digit PIN.
@@ -119,23 +120,9 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Brand Logo
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'R',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
+                    const ResolvaLogo(
+                      size: 60,
+                      useBoxedBadge: true,
                     ),
                     const SizedBox(height: 20),
 
@@ -192,6 +179,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                       onDigitPressed: _onDigit,
                       onDeletePressed: _onDelete,
                       onClearPressed: _onClear,
+                      onSubmitPressed: _handleConfirm,
                     ),
                     const SizedBox(height: 28),
 

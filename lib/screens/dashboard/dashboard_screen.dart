@@ -1167,7 +1167,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: phoneCtrl,
-            decoration: const InputDecoration(prefixIcon: Icon(Icons.phone_outlined, size: 20)),
+            keyboardType: TextInputType.number,
+            maxLength: 11,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.phone_outlined, size: 20),
+              counterText: '',
+            ),
           ),
           const SizedBox(height: 28),
 

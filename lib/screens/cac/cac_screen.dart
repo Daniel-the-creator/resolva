@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
@@ -88,15 +89,7 @@ class _CacScreenState extends State<CacScreen> {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0A192F),
-            Color(0xFF172A45),
-            Color(0xFF0F3460),
-          ],
-        ),
+        gradient: AppColors.heroGradient,
       ),
       child: Center(
         child: ConstrainedBox(
@@ -926,12 +919,22 @@ class _CacScreenState extends State<CacScreen> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _phoneController,
-              keyboardType: TextInputType.phone,
+              keyboardType: TextInputType.number,
+              maxLength: 11,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
               decoration: const InputDecoration(
                 hintText: '08012345678',
                 prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                counterText: '',
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Enter your phone number' : null,
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Enter your phone number';
+                if (v.length != 11) return 'Phone number must be 11 digits';
+                return null;
+              },
             ),
           ] else ...[
             Row(
@@ -978,13 +981,22 @@ class _CacScreenState extends State<CacScreen> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _phoneController,
-                        keyboardType: TextInputType.phone,
+                        keyboardType: TextInputType.number,
+                        maxLength: 11,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(11),
+                        ],
                         decoration: const InputDecoration(
                           hintText: '08012345678',
                           prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                          counterText: '',
                         ),
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Enter phone number' : null,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Enter phone number';
+                          if (v.length != 11) return 'Phone number must be 11 digits';
+                          return null;
+                        },
                       ),
                     ],
                   ),

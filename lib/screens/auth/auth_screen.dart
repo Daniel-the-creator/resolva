@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -6,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/shared/app_navigation.dart';
 import '../../widgets/shared/app_footer.dart';
+import '../../widgets/shared/common_widgets.dart';
 
 /// Authentication Screen supporting both Sign In and Sign Up tabs with demo pre-fill options.
 class AuthScreen extends StatefulWidget {
@@ -164,23 +166,9 @@ class _AuthScreenState extends State<AuthScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // Logo
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    'R',
-                                    style: TextStyle(
-                                      color: AppColors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
+                              const ResolvaLogo(
+                                size: 64,
+                                useBoxedBadge: true,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -517,12 +505,22 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 8),
           TextFormField(
             controller: _regPhoneController,
-            keyboardType: TextInputType.phone,
+            keyboardType: TextInputType.number,
+            maxLength: 11,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
             decoration: const InputDecoration(
               hintText: '08012345678',
               prefixIcon: Icon(Icons.phone_outlined, size: 20),
+              counterText: '',
             ),
-            validator: (v) => v == null || v.isEmpty ? 'Enter phone number' : null,
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Enter phone number';
+              if (v.length != 11) return 'Phone number must be 11 digits';
+              return null;
+            },
           ),
           const SizedBox(height: 16),
           Text(

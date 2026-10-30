@@ -365,6 +365,93 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Official RESOLVA Brand Logo widget.
+///
+/// Renders the official stylized 'R ESOLVA' brand mark (`logo_blue.png` or `logo_white.png`)
+/// or the boxed badge (`logo_mark_blue.png`), with optional wordmark text for accessibility/testing.
+class ResolvaLogo extends StatelessWidget {
+  final double size;
+  final bool isLightOnDark;
+  final bool showWordmark;
+  final bool useBoxedBadge;
+  final double fontSize;
+
+  const ResolvaLogo({
+    super.key,
+    this.size = 44,
+    this.isLightOnDark = false,
+    this.showWordmark = false,
+    this.useBoxedBadge = false,
+    this.fontSize = 22,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String assetPath = useBoxedBadge
+        ? 'assets/images/logo_mark_blue.png'
+        : (isLightOnDark ? 'assets/images/logo_white.png' : 'assets/images/logo_blue.png');
+
+    Widget logoImage = Image.asset(
+      assetPath,
+      height: size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: isLightOnDark ? AppColors.white.withValues(alpha: 0.15) : AppColors.brandBlue,
+            borderRadius: BorderRadius.circular(size * 0.25),
+          ),
+          child: Center(
+            child: Text(
+              'R',
+              style: TextStyle(
+                color: AppColors.white,
+                fontSize: size * 0.52,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (useBoxedBadge) {
+      logoImage = ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.26),
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: logoImage,
+        ),
+      );
+    }
+
+    if (!showWordmark) {
+      return logoImage;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        logoImage,
+        const SizedBox(width: 10),
+        Text(
+          'RESOLVA',
+          style: GoogleFonts.inter(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w800,
+            color: isLightOnDark ? AppColors.white : AppColors.brandBlue,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Section heading used across pages.
 class SectionHeading extends StatelessWidget {
   final String title;

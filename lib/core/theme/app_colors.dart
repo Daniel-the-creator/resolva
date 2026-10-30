@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary brand colors
-  static const Color primaryNavy = Color(0xFF14213D);
-  static const Color royalBlue = Color(0xFF2563EB);
+  // Primary brand colors (Brand Identity: #0C4CB0 & #FFFFFF)
+  static const Color brandBlue = Color(0xFF0C4CB0);
+  static const Color primaryNavy = Color(0xFF09367D);
+  static const Color royalBlue = Color(0xFF0C4CB0);
   static const Color emeraldGreen = Color(0xFF10B981);
   static const Color accentGold = Color(0xFFF59E0B);
 
@@ -21,7 +22,7 @@ class AppColors {
   static const Color textSecondary = Color(0xFF64748B);
   static const Color textTertiary = Color(0xFF94A3B8);
   static const Color textMuted = Color(0xFF94A3B8);
-  static const Color textSecondaryDark = Color(0xFFCBD5E1);
+  static const Color textSecondaryDark = Color(0xFFDBEAFE);
 
   // Border & divider
   static const Color border = Color(0xFFE2E8F0);
@@ -32,7 +33,7 @@ class AppColors {
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
-  static const Color info = Color(0xFF3B82F6);
+  static const Color info = Color(0xFF0C4CB0);
 
   // Social platform colors
   static const Color instagram = Color(0xFFE4405F);
@@ -47,13 +48,13 @@ class AppColors {
 
   // Gradient
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryNavy, royalBlue],
+    colors: [Color(0xFF09367D), Color(0xFF0C4CB0)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient heroGradient = LinearGradient(
-    colors: [Color(0xFF14213D), Color(0xFF1E3A5F), Color(0xFF2563EB)],
+    colors: [Color(0xFF082E6B), Color(0xFF0C4CB0), Color(0xFF135DD1)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

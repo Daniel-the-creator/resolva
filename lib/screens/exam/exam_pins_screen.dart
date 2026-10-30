@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
@@ -326,7 +327,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
 
 // ──────────── PRODUCT DETAIL ────────────
 
-class _ProductDetailView extends StatelessWidget {
+class _ProductDetailView extends StatefulWidget {
   final ExamController controller;
   final Function(String) onNavigate;
   final bool isMobile;
@@ -337,7 +338,58 @@ class _ProductDetailView extends StatelessWidget {
     required this.isMobile,
   });
 
+  @override
+  State<_ProductDetailView> createState() => _ProductDetailViewState();
+}
+
+class _ProductDetailViewState extends State<_ProductDetailView> {
   static final _fmt = NumberFormat('#,##0', 'en_NG');
+  late final TextEditingController _qtyController;
+  final FocusNode _qtyFocusNode = FocusNode();
+  Worker? _qtyWorker;
+
+  ExamController get controller => widget.controller;
+  Function(String) get onNavigate => widget.onNavigate;
+  bool get isMobile => widget.isMobile;
+
+  @override
+  void initState() {
+    super.initState();
+    _qtyController = TextEditingController(text: '${controller.quantity.value}');
+    _qtyWorker = ever<int>(controller.quantity, (val) {
+      if (!_qtyFocusNode.hasFocus && _qtyController.text != '$val') {
+        _qtyController.text = '$val';
+      }
+    });
+    _qtyFocusNode.addListener(() {
+      if (!_qtyFocusNode.hasFocus) {
+        _commitQuantity(_qtyController.text);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _qtyWorker?.dispose();
+    _qtyFocusNode.dispose();
+    _qtyController.dispose();
+    super.dispose();
+  }
+
+  void _commitQuantity(String raw) {
+    final max = controller.selectedProduct.value?.maxQuantity ?? 10;
+    final parsed = int.tryParse(raw.trim());
+    if (parsed == null || parsed < 1) {
+      controller.setQuantity(1);
+      _qtyController.text = '1';
+    } else if (parsed > max) {
+      controller.setQuantity(max);
+      _qtyController.text = '$max';
+    } else {
+      controller.setQuantity(parsed);
+      _qtyController.text = '$parsed';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -457,22 +509,47 @@ class _ProductDetailView extends StatelessWidget {
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.remove_rounded, size: 18),
-                                        onPressed: controller.decrementQuantity,
+                                        onPressed: () {
+                                          controller.decrementQuantity();
+                                          _qtyController.text = '${controller.quantity.value}';
+                                        },
                                       ),
-                                      Obx(() => SizedBox(
-                                        width: 48,
-                                        child: Text(
-                                          '${controller.quantity.value}',
+                                      SizedBox(
+                                        width: 64,
+                                        child: TextField(
+                                          controller: _qtyController,
+                                          focusNode: _qtyFocusNode,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                           ),
+                                          decoration: const InputDecoration(
+                                            isDense: true,
+                                            filled: false,
+                                            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                                            border: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
+                                          ),
+                                          onChanged: (val) {
+                                            final parsed = int.tryParse(val);
+                                            if (parsed != null) {
+                                              final max = product.maxQuantity ?? 10;
+                                              controller.setQuantity(parsed.clamp(1, max));
+                                            }
+                                          },
+                                          onSubmitted: _commitQuantity,
                                         ),
-                                      )),
+                                      ),
                                       IconButton(
                                         icon: const Icon(Icons.add_rounded, size: 18),
-                                        onPressed: controller.incrementQuantity,
+                                        onPressed: () {
+                                          controller.incrementQuantity();
+                                          _qtyController.text = '${controller.quantity.value}';
+                                        },
                                       ),
                                     ],
                                   ),

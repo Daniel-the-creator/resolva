@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../controllers/auth_controller.dart';
+import '../../widgets/shared/common_widgets.dart';
 
 /// Mandatory Terms of Service & Privacy Policy acceptance screen.
 ///
@@ -253,23 +254,9 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                     Center(
                       child: Column(
                         children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'R',
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
+                          const ResolvaLogo(
+                            size: 64,
+                            useBoxedBadge: true,
                           ),
                           const SizedBox(height: 16),
                           Text(

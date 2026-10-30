@@ -1,11 +1,11 @@
 {
-    "name": "resolva",
-    "short_name": "resolva",
+    "name": "RESOLVA — Digital Services Platform",
+    "short_name": "RESOLVA",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0C4CB0",
+    "theme_color": "#0C4CB0",
+    "description": "RESOLVA — Examination E-Pins, Social Media Services & CAC Registration Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

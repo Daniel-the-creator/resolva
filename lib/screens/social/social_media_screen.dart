@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -402,12 +403,51 @@ class _OrderFormView extends StatefulWidget {
 class _OrderFormViewState extends State<_OrderFormView> {
   final _formKey = GlobalKey<FormState>();
   final _urlController = TextEditingController();
+  late final TextEditingController _qtyController;
+  final FocusNode _qtyFocusNode = FocusNode();
+  Worker? _qtyWorker;
   static final _fmt = NumberFormat('#,##0', 'en_NG');
 
   @override
+  void initState() {
+    super.initState();
+    _qtyController = TextEditingController(text: '${widget.controller.quantity.value}');
+    _qtyWorker = ever<int>(widget.controller.quantity, (val) {
+      if (!_qtyFocusNode.hasFocus && _qtyController.text != '$val') {
+        _qtyController.text = '$val';
+      }
+    });
+    _qtyFocusNode.addListener(() {
+      if (!_qtyFocusNode.hasFocus) {
+        _commitQuantity(_qtyController.text);
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _qtyWorker?.dispose();
+    _qtyFocusNode.dispose();
+    _qtyController.dispose();
     _urlController.dispose();
     super.dispose();
+  }
+
+  void _commitQuantity(String raw) {
+    final service = widget.controller.selectedService.value;
+    if (service == null) return;
+    final cleaned = raw.replaceAll(',', '').trim();
+    final parsed = int.tryParse(cleaned);
+    if (parsed == null || parsed < service.minQuantity) {
+      widget.controller.setQuantity(service.minQuantity);
+      _qtyController.text = '${service.minQuantity}';
+    } else if (parsed > service.maxQuantity) {
+      widget.controller.setQuantity(service.maxQuantity);
+      _qtyController.text = '${service.maxQuantity}';
+    } else {
+      widget.controller.setQuantity(parsed);
+      _qtyController.text = '$parsed';
+    }
   }
 
   @override
@@ -534,22 +574,48 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                       children: [
                                         IconButton(
                                           icon: const Icon(Icons.remove_rounded, size: 18),
-                                          onPressed: ctrl.decrementQuantity,
+                                          onPressed: () {
+                                            ctrl.decrementQuantity();
+                                            _qtyController.text = '${ctrl.quantity.value}';
+                                          },
                                         ),
-                                        Obx(() => SizedBox(
-                                          width: 72,
-                                          child: Text(
-                                            _fmt.format(ctrl.quantity.value),
+                                        SizedBox(
+                                          width: 88,
+                                          child: TextField(
+                                            controller: _qtyController,
+                                            focusNode: _qtyFocusNode,
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
                                             ),
+                                            decoration: const InputDecoration(
+                                              isDense: true,
+                                              filled: false,
+                                              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                                              border: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onChanged: (val) {
+                                              final parsed = int.tryParse(val.replaceAll(',', ''));
+                                              if (parsed != null) {
+                                                ctrl.setQuantity(
+                                                  parsed.clamp(service.minQuantity, service.maxQuantity),
+                                                );
+                                              }
+                                            },
+                                            onSubmitted: _commitQuantity,
                                           ),
-                                        )),
+                                        ),
                                         IconButton(
                                           icon: const Icon(Icons.add_rounded, size: 18),
-                                          onPressed: ctrl.incrementQuantity,
+                                          onPressed: () {
+                                            ctrl.incrementQuantity();
+                                            _qtyController.text = '${ctrl.quantity.value}';
+                                          },
                                         ),
                                       ],
                                     ),

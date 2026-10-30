@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../controllers/auth_controller.dart';
+import 'common_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// RESOLVA responsive navigation bar for desktop and tablet.
@@ -136,38 +137,10 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildLogo(BuildContext context) {
     return GestureDetector(
       onTap: () => onNavigate('/'),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Text(
-                'R',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'RESOLVA',
-            style: GoogleFonts.inter(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primaryNavy,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ],
+      child: const ResolvaLogo(
+        size: 40,
+        showWordmark: true,
+        fontSize: 22,
       ),
     );
   }
@@ -215,32 +188,10 @@ class ResolvaDrawer extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'R',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'RESOLVA',
-                    style: GoogleFonts.inter(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryNavy,
-                    ),
+                  const ResolvaLogo(
+                    size: 40,
+                    showWordmark: true,
+                    fontSize: 22,
                   ),
                   const Spacer(),
                   IconButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:resolva/main.dart';
@@ -109,6 +110,28 @@ void main() {
       await testScreenAtSize(tester, desktopSize, '/social-media');
       await testScreenAtSize(tester, desktopSize, '/cac');
       await testScreenAtSize(tester, desktopSize, '/dashboard');
+    });
+
+    testWidgets('Supports physical keyboard input on Security PIN screens', (tester) async {
+      final auth = Get.find<AuthController>();
+      auth.prepareDemoUser(isReturningUser: true);
+      auth.isLoggedIn.value = true;
+
+      await testScreenAtSize(tester, desktopSize, '/verify-pin');
+
+      // Type PIN 123456 using physical keyboard events
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit1);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit2);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
+      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit5);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit6);
+      await tester.pumpAndSettle();
+
+      // Verify PIN was accepted and session unlocked
+      expect(auth.isSessionUnlocked.value, isTrue);
     });
   });
 }
