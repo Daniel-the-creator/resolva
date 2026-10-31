@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -13,12 +12,6 @@ import 'package:resolva/controllers/admin_controller.dart';
 
 void main() {
   setUp(() {
-    FlutterError.onError = (FlutterErrorDetails details) {
-      print('=== RENDERFLEX ERROR CAUGHT ===');
-      print(details.toDiagnosticsNode().toStringDeep());
-      print('===============================');
-      FlutterError.presentError(details);
-    };
     Get.reset();
     Get.put(NavigationController(), permanent: true);
     Get.put(AdminController(), permanent: true);
@@ -43,19 +36,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify no red screen / crash or layout overflow
-    final exception = tester.takeException();
-    if (exception != null) {
-      if (exception is FlutterError) {
-        print('=== FLUTTER ERROR DIAGNOSTICS ===');
-        for (final node in exception.diagnostics) {
-          print(node.toStringDeep());
-        }
-        print('=== END DIAGNOSTICS ===');
-      } else {
-        print('TEST_EXCEPTION: $exception');
-      }
-    }
-    expect(exception, isNull);
+    expect(tester.takeException(), isNull);
   }
 
   group('Responsive Layouts — Small Phone (360x640)', () {

@@ -169,16 +169,22 @@ class _HeroSection extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primaryNavy,
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 18 : 28, vertical: 14),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 14 : 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Explore Services', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_rounded, size: 18),
-                ],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Explore Services', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_forward_rounded, size: 18),
+                  ],
+                ),
               ),
             ),
             OutlinedButton(
@@ -186,10 +192,16 @@ class _HeroSection extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.white,
                 side: BorderSide(color: AppColors.white.withValues(alpha: 0.4), width: 1.5),
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 18 : 28, vertical: 14),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 14 : 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Get Started', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Get Started', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+              ),
             ),
           ],
         ),
