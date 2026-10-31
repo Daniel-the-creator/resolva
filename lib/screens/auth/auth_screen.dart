@@ -95,6 +95,22 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  void _fillAdminDemoUser() {
+    setState(() {
+      _isRegister = false;
+      controller.prepareDemoUser(isReturningUser: true, isAdminUser: true);
+      _loginEmailController.text = controller.loginEmail.value;
+      _loginPasswordController.text = controller.loginPassword.value;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Loaded Admin Account (PIN: 123456 • Opens Admin Dashboard)'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   void _handleLogin() async {
     if (_loginFormKey.currentState!.validate()) {
       controller.loginEmail.value = _loginEmailController.text.trim();
@@ -325,6 +341,19 @@ class _AuthScreenState extends State<AuthScreen> {
                                           ),
                                         ),
                                       ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton.icon(
+                                        onPressed: _fillAdminDemoUser,
+                                        icon: const Icon(Icons.admin_panel_settings_rounded, size: 15),
+                                        label: const Text('Admin Dashboard Account (PIN: 123456)'),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          textStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),

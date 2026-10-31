@@ -8,11 +8,13 @@ import 'controllers/onboarding_controller.dart';
 import 'controllers/dashboard_controller.dart';
 import 'controllers/exam_controller.dart';
 import 'controllers/social_controller.dart';
+import 'controllers/admin_controller.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/exam/exam_pins_screen.dart';
 import 'screens/social/social_media_screen.dart';
 import 'screens/cac/cac_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/auth/auth_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
 import 'screens/onboarding/policy_acceptance_screen.dart';
@@ -28,9 +30,20 @@ void main() {
   runApp(const ResolvaApp());
 }
 
-/// Global navigation helper
+/// Global navigation helper with role-based isolation
 void navigateTo(String route) {
   final navController = Get.find<NavigationController>();
+  final authController = Get.find<AuthController>();
+
+  // Enforce strict separation between Customer Dashboard and Admin Portal
+  if (authController.isFullyAuthorized) {
+    if (authController.isAdmin.value &&
+        (route == '/dashboard' || route == '/orders')) {
+      route = '/admin';
+    } else if (!authController.isAdmin.value && route == '/admin') {
+      route = '/dashboard';
+    }
+  }
 
   switch (route) {
     case '/':
@@ -47,6 +60,9 @@ void navigateTo(String route) {
       break;
     case '/dashboard':
       navController.changePage(4);
+      break;
+    case '/admin':
+      navController.changePage(5);
       break;
     default:
       navController.changePage(-1);
@@ -79,11 +95,13 @@ class ResolvaApp extends StatelessWidget {
         ),
         GetPage(
           name: '/login',
-          page: () => const AuthScreen(onNavigate: navigateTo, initialRegister: false),
+          page: () =>
+              const AuthScreen(onNavigate: navigateTo, initialRegister: false),
         ),
         GetPage(
           name: '/register',
-          page: () => const AuthScreen(onNavigate: navigateTo, initialRegister: true),
+          page: () =>
+              const AuthScreen(onNavigate: navigateTo, initialRegister: true),
         ),
         GetPage(
           name: '/forgot-password',
@@ -155,13 +173,20 @@ class ResolvaApp extends StatelessWidget {
         ),
         GetPage(
           name: '/dashboard',
-          page: () => const DashboardScreen(onNavigate: navigateTo, initialTab: 0),
+          page: () =>
+              const DashboardScreen(onNavigate: navigateTo, initialTab: 0),
           middlewares: [AuthGuard()],
         ),
         GetPage(
           name: '/orders',
-          page: () => const DashboardScreen(onNavigate: navigateTo, initialTab: 1),
+          page: () =>
+              const DashboardScreen(onNavigate: navigateTo, initialTab: 1),
           middlewares: [AuthGuard()],
+        ),
+        GetPage(
+          name: '/admin',
+          page: () => const AdminDashboardScreen(onNavigate: navigateTo),
+          middlewares: [AdminGuard()],
         ),
       ],
     );
@@ -173,6 +198,7 @@ class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(NavigationController(), permanent: true);
+    Get.put(AdminController(), permanent: true);
     Get.put(AuthController(), permanent: true);
     Get.put(OnboardingController(), permanent: true);
     Get.put(DashboardController(), permanent: true);

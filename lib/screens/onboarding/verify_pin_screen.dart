@@ -65,11 +65,8 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
         ),
       );
 
-      // Navigate to originally intended service or customer dashboard
-      final destination = authController.intendedRoute.isNotEmpty
-          ? authController.intendedRoute
-          : '/dashboard';
-      authController.intendedRoute = '';
+      // Navigate to appropriate role destination
+      final destination = authController.getNextAuthRoute();
       widget.onNavigate(destination);
     } else {
       setState(() {

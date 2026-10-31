@@ -179,5 +179,37 @@ void main() {
       // Cannot bypass directly to dashboard
       expect(authGuard.redirect('/dashboard')?.name, '/create-pin');
     });
+
+    test('Scenario 12: Admin role security isolation — cannot switch to customer dashboard/orders', () {
+      authController.prepareDemoUser(isReturningUser: true, isAdminUser: true);
+      authController.isLoggedIn.value = true;
+      authController.isSessionUnlocked.value = true;
+      expect(authController.isAdmin.value, true);
+
+      // AuthGuard redirects admin away from customer dashboard & orders to /admin
+      expect(authGuard.redirect('/dashboard')?.name, '/admin');
+      expect(authGuard.redirect('/orders')?.name, '/admin');
+    });
+
+    test('Scenario 13: AdminGuard prevents regular customers from accessing /admin', () {
+      final adminGuard = AdminGuard();
+      authController.prepareDemoUser(isReturningUser: true, isAdminUser: false);
+      authController.isLoggedIn.value = true;
+      authController.isSessionUnlocked.value = true;
+      expect(authController.isAdmin.value, false);
+
+      // Customer is blocked and redirected to /dashboard
+      expect(adminGuard.redirect('/admin')?.name, '/dashboard');
+    });
+
+    test('Scenario 14: AdminGuard redirects unauthenticated visitors to /login', () {
+      final adminGuard = AdminGuard();
+      authController.isLoggedIn.value = false;
+      authController.isSessionUnlocked.value = false;
+
+      // Guest is redirected to /login with intendedRoute recorded
+      expect(adminGuard.redirect('/admin')?.name, '/login');
+      expect(authController.intendedRoute, '/admin');
+    });
   });
 }

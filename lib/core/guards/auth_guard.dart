@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 
-/// Centralized route guard for protected RESOLVA services, marketplaces, and dashboard.
+/// Centralized route guard for protected RESOLVA customer services, marketplaces, and dashboard.
 ///
-/// Restricts access to authenticated, onboarded, and PIN-verified users only.
-/// Any unauthenticated or partially-onboarded navigation is intercepted and routed
-/// to the appropriate authentication checkpoint or onboarding step.
+/// Restricts access to authenticated, onboarded, PIN-verified CUSTOMER users only.
+/// Administrators are strictly isolated from customer dashboard/service routes and
+/// redirected to `/admin`.
 class AuthGuard extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
@@ -55,7 +55,51 @@ class AuthGuard extends GetMiddleware {
       return const RouteSettings(name: '/verify-pin');
     }
 
-    // User is fully authorized and session is unlocked
+    // 5. Strict Role Separation: Admins cannot switch to customer dashboard
+    if (authController.isAdmin.value &&
+        (route == '/dashboard' || route == '/orders')) {
+      return const RouteSettings(name: '/admin');
+    }
+
+    // Customer is fully authorized and session is unlocked
+    return null;
+  }
+}
+
+/// Strict route guard for the RESOLVA Admin Portal (`/admin`).
+///
+/// Only authenticated, PIN-verified Administrators (`isAdmin == true`) can access `/admin`.
+/// Regular users attempting to navigate to `/admin` are blocked and redirected to `/dashboard`.
+class AdminGuard extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    final authController = Get.find<AuthController>();
+
+    if (!authController.isLoggedIn.value) {
+      authController.intendedRoute = '/admin';
+      return const RouteSettings(name: '/login');
+    }
+
+    if (!authController.hasAcceptedCurrentPolicies) {
+      authController.intendedRoute = '/admin';
+      return const RouteSettings(name: '/policy-acceptance');
+    }
+
+    if (!authController.hasConfiguredPin) {
+      authController.intendedRoute = '/admin';
+      return const RouteSettings(name: '/create-pin');
+    }
+
+    if (!authController.isSessionUnlocked.value) {
+      authController.intendedRoute = '/admin';
+      return const RouteSettings(name: '/verify-pin');
+    }
+
+    // Block non-admin users from accessing the admin dashboard
+    if (!authController.isAdmin.value) {
+      return const RouteSettings(name: '/dashboard');
+    }
+
     return null;
   }
 }

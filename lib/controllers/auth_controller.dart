@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import '../core/constants/app_constants.dart';
+import '../data/models/admin_models.dart';
+import 'admin_controller.dart';
 
 /// Central authentication and session authorization controller.
 ///
@@ -28,6 +30,7 @@ class AuthController extends GetxController {
   // Authentication & session state
   final isLoggedIn = false.obs;
   final isSessionUnlocked = false.obs;
+  final isAdmin = false.obs;
   final showRegistration = false.obs;
 
   // Legal policy acceptance tracking (versioned)
@@ -72,6 +75,13 @@ class AuthController extends GetxController {
     if (!isSessionUnlocked.value) {
       return '/verify-pin';
     }
+    if (isAdmin.value) {
+      intendedRoute = '';
+      return '/admin';
+    }
+    if (intendedRoute == '/admin') {
+      intendedRoute = '';
+    }
     final target = intendedRoute.isNotEmpty ? intendedRoute : '/dashboard';
     intendedRoute = '';
     return target;
@@ -95,8 +105,26 @@ class AuthController extends GetxController {
 
   /// Sets up credentials for demonstration testing.
   /// If [isReturningUser] is true, configures terms acceptance and existing PIN '123456'.
-  /// If false, creates a new un-onboarded user who must accept terms and create a PIN.
-  void prepareDemoUser({required bool isReturningUser}) {
+  /// If [isAdminUser] is true, configures an Administrator account with PIN '123456'.
+  void prepareDemoUser({
+    required bool isReturningUser,
+    bool isAdminUser = false,
+  }) {
+    isAdmin.value = isAdminUser;
+
+    if (isAdminUser) {
+      loginEmail.value = 'admin@resolva.ng';
+      loginPassword.value = 'AdminResolva2026!';
+      userFullName.value = 'Ibrahim Musa (Admin)';
+      userEmail.value = 'admin@resolva.ng';
+      acceptedTermsVersion.value = AppConstants.termsVersion;
+      acceptedPrivacyVersion.value = AppConstants.privacyVersion;
+      securityPin.value = '123456';
+      isSessionUnlocked.value = false;
+      intendedRoute = '/admin';
+      return;
+    }
+
     loginEmail.value = 'demo@resolva.ng';
     loginPassword.value = 'ResolvaPass2025!';
     userFullName.value = 'Demo User';
@@ -124,6 +152,29 @@ class AuthController extends GetxController {
     isLoggedIn.value = true;
     isSessionUnlocked.value = false; // session requires PIN verification if returning
     userEmail.value = loginEmail.value;
+
+    // Automatically recognize admin email addresses
+    if (userEmail.value.toLowerCase().contains('admin') ||
+        userEmail.value.toLowerCase() == 'ibrahim.musa@resolva.ng') {
+      isAdmin.value = true;
+      userFullName.value = 'Ibrahim Musa (Admin)';
+      if (acceptedTermsVersion.value.isEmpty) {
+        acceptedTermsVersion.value = AppConstants.termsVersion;
+        acceptedPrivacyVersion.value = AppConstants.privacyVersion;
+      }
+      if (securityPin.value.isEmpty) {
+        securityPin.value = '123456';
+      }
+    }
+
+    if (Get.isRegistered<AdminController>()) {
+      Get.find<AdminController>().recordUserLogin(
+        email: userEmail.value,
+        fullName: userFullName.value,
+        role: isAdmin.value ? UserRole.admin : UserRole.customer,
+      );
+    }
+
     return true;
   }
 
@@ -142,6 +193,7 @@ class AuthController extends GetxController {
     regLoading.value = false;
     isLoggedIn.value = true;
     isSessionUnlocked.value = false;
+    isAdmin.value = false;
     userFullName.value = regFullName.value;
     userEmail.value = regEmail.value;
 
@@ -149,6 +201,17 @@ class AuthController extends GetxController {
     acceptedTermsVersion.value = '';
     acceptedPrivacyVersion.value = '';
     securityPin.value = '';
+
+    if (Get.isRegistered<AdminController>()) {
+      Get.find<AdminController>().addUser(
+        fullName: regFullName.value,
+        email: regEmail.value,
+        phone: regPhone.value,
+        role: UserRole.customer,
+        status: UserStatus.pendingOnboarding,
+        hasPinConfigured: false,
+      );
+    }
 
     return true;
   }
@@ -185,8 +248,12 @@ class AuthController extends GetxController {
   /// Standard logout: clears active session and authentication,
   /// preserving stored PIN and policy acceptance for demonstration returning-user flow.
   void logout() {
+    if (isLoggedIn.value && Get.isRegistered<AdminController>()) {
+      Get.find<AdminController>().recordUserLogout(email: userEmail.value);
+    }
     isLoggedIn.value = false;
     isSessionUnlocked.value = false;
+    isAdmin.value = false;
     intendedRoute = '';
     loginPassword.value = '';
   }

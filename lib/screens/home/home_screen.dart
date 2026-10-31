@@ -169,7 +169,7 @@ class _HeroSection extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primaryNavy,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 18 : 28, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Row(
@@ -186,7 +186,7 @@ class _HeroSection extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.white,
                 side: BorderSide(color: AppColors.white.withValues(alpha: 0.4), width: 1.5),
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 18 : 28, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text('Get Started', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),

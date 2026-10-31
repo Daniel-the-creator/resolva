@@ -1,0 +1,390 @@
+import 'package:get/get.dart';
+import '../data/models/admin_models.dart';
+import '../data/mock/mock_data.dart';
+
+/// Controller managing the RESOLVA Admin Dashboard:
+/// - Adding & removing users
+/// - Toggling user status (Active / Suspended)
+/// - Viewing user information & last purchase details
+/// - Tracking user login/logout sessions & live activities
+/// - Platform analytics & revenue breakdowns
+class AdminController extends GetxController {
+  final users = <AdminUserRecord>[].obs;
+  final filteredUsers = <AdminUserRecord>[].obs;
+  final activityLogs = <UserActivityLog>[].obs;
+  final filteredActivityLogs = <UserActivityLog>[].obs;
+
+  // Filters & search
+  final userSearchQuery = ''.obs;
+  final userStatusFilter = 'All'.obs; // All, Active, Online, Suspended, Pending, Admins
+  final activityFilter = 'All'.obs; // All, Logins, Logouts, Purchases, Account Changes
+  final activitySearchQuery = ''.obs;
+
+  // Selected user for detailed profile modal/drawer
+  final selectedUser = Rxn<AdminUserRecord>();
+
+  int _nextUserCounter = 1009;
+  int _nextLogCounter = 9013;
+
+  @override
+  void onInit() {
+    super.onInit();
+    users.assignAll(mockAdminUsers);
+    filteredUsers.assignAll(mockAdminUsers);
+    activityLogs.assignAll(mockAdminActivityLogs);
+    filteredActivityLogs.assignAll(mockAdminActivityLogs);
+  }
+
+  // ──────────────────── ANALYTICS GETTERS ────────────────────
+
+  int get totalUsersCount => users.length;
+
+  int get activeUsersCount =>
+      users.where((u) => u.status == UserStatus.active).length;
+
+  int get onlineUsersCount =>
+      users.where((u) => u.isCurrentlyOnline).length;
+
+  int get suspendedUsersCount =>
+      users.where((u) => u.status == UserStatus.suspended).length;
+
+  int get pendingUsersCount =>
+      users.where((u) => u.status == UserStatus.pendingOnboarding).length;
+
+  int get totalOrdersCount =>
+      users.fold(0, (sum, u) => sum + u.totalOrders);
+
+  double get totalPlatformRevenue =>
+      users.fold(0.0, (sum, u) => sum + u.totalSpent);
+
+  double get averageRevenuePerUser =>
+      users.isEmpty ? 0 : totalPlatformRevenue / users.length;
+
+  int get totalLoginsToday => activityLogs
+      .where((a) => a.type == ActivityType.login)
+      .length;
+
+  int get totalLogoutsToday => activityLogs
+      .where((a) => a.type == ActivityType.logout)
+      .length;
+
+  /// Revenue breakdown by category for analytics visualization
+  Map<String, double> get revenueByCategory {
+    double examRevenue = 0;
+    double socialRevenue = 0;
+    for (final u in users) {
+      if (u.lastPurchase != null) {
+        if (u.lastPurchase!.category == 'Examination E-Pins') {
+          examRevenue += u.totalSpent * 0.65;
+          socialRevenue += u.totalSpent * 0.35;
+        } else {
+          socialRevenue += u.totalSpent * 0.65;
+          examRevenue += u.totalSpent * 0.35;
+        }
+      }
+    }
+    return {
+      'Examination E-Pins': examRevenue,
+      'Social Media Services': socialRevenue,
+    };
+  }
+
+  // ──────────────────── USER FILTERING ────────────────────
+
+  void searchUsers(String query) {
+    userSearchQuery.value = query;
+    _applyUserFilters();
+  }
+
+  void filterUsersByStatus(String status) {
+    userStatusFilter.value = status;
+    _applyUserFilters();
+  }
+
+  void _applyUserFilters() {
+    var list = users.toList();
+
+    switch (userStatusFilter.value) {
+      case 'Active':
+        list = list.where((u) => u.status == UserStatus.active).toList();
+        break;
+      case 'Online':
+        list = list.where((u) => u.isCurrentlyOnline).toList();
+        break;
+      case 'Suspended':
+        list = list.where((u) => u.status == UserStatus.suspended).toList();
+        break;
+      case 'Pending':
+        list = list.where((u) => u.status == UserStatus.pendingOnboarding).toList();
+        break;
+      case 'Admins':
+        list = list.where((u) => u.role == UserRole.admin).toList();
+        break;
+    }
+
+    if (userSearchQuery.value.isNotEmpty) {
+      final q = userSearchQuery.value.toLowerCase();
+      list = list
+          .where((u) =>
+              u.fullName.toLowerCase().contains(q) ||
+              u.email.toLowerCase().contains(q) ||
+              u.phone.toLowerCase().contains(q) ||
+              u.id.toLowerCase().contains(q) ||
+              (u.lastPurchase?.productName.toLowerCase().contains(q) ?? false))
+          .toList();
+    }
+
+    filteredUsers.assignAll(list);
+  }
+
+  // ──────────────────── ACTIVITY FILTERING ────────────────────
+
+  void filterActivities(String filter) {
+    activityFilter.value = filter;
+    _applyActivityFilters();
+  }
+
+  void searchActivities(String query) {
+    activitySearchQuery.value = query;
+    _applyActivityFilters();
+  }
+
+  void _applyActivityFilters() {
+    var list = activityLogs.toList();
+
+    switch (activityFilter.value) {
+      case 'Logins':
+        list = list
+            .where((a) =>
+                a.type == ActivityType.login ||
+                a.type == ActivityType.pinVerified)
+            .toList();
+        break;
+      case 'Logouts':
+        list = list.where((a) => a.type == ActivityType.logout).toList();
+        break;
+      case 'Purchases':
+        list = list.where((a) => a.type == ActivityType.purchase).toList();
+        break;
+      case 'Account Changes':
+        list = list
+            .where((a) =>
+                a.type == ActivityType.accountCreated ||
+                a.type == ActivityType.accountRemoved ||
+                a.type == ActivityType.statusChanged)
+            .toList();
+        break;
+    }
+
+    if (activitySearchQuery.value.isNotEmpty) {
+      final q = activitySearchQuery.value.toLowerCase();
+      list = list
+          .where((a) =>
+              a.userName.toLowerCase().contains(q) ||
+              a.userEmail.toLowerCase().contains(q) ||
+              a.description.toLowerCase().contains(q) ||
+              a.userId.toLowerCase().contains(q))
+          .toList();
+    }
+
+    filteredActivityLogs.assignAll(list);
+  }
+
+  // ──────────────────── USER MANAGEMENT ACTIONS ────────────────────
+
+  /// Adds a new user from the Admin Dashboard or Registration flow.
+  AdminUserRecord addUser({
+    required String fullName,
+    required String email,
+    required String phone,
+    UserRole role = UserRole.customer,
+    UserStatus status = UserStatus.active,
+    bool hasPinConfigured = true,
+  }) {
+    final now = DateTime.now();
+    final newUser = AdminUserRecord(
+      id: 'USR-${_nextUserCounter++}',
+      fullName: fullName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      role: role,
+      status: status,
+      joinedAt: now,
+      lastLoginAt: null,
+      lastLogoutAt: null,
+      isCurrentlyOnline: false,
+      totalOrders: 0,
+      totalSpent: 0,
+      hasPinConfigured: hasPinConfigured,
+      hasAcceptedPolicies: true,
+      lastPurchase: null,
+    );
+
+    users.insert(0, newUser);
+    _applyUserFilters();
+
+    recordActivity(
+      userId: newUser.id,
+      userName: newUser.fullName,
+      userEmail: newUser.email,
+      type: ActivityType.accountCreated,
+      description:
+          'Account created (${role == UserRole.admin ? "Administrator" : "Customer"})',
+    );
+
+    return newUser;
+  }
+
+  /// Removes a user by ID from the platform.
+  void removeUser(String userId) {
+    final index = users.indexWhere((u) => u.id == userId);
+    if (index == -1) return;
+
+    final removed = users.removeAt(index);
+    if (selectedUser.value?.id == userId) {
+      selectedUser.value = null;
+    }
+    _applyUserFilters();
+
+    recordActivity(
+      userId: removed.id,
+      userName: removed.fullName,
+      userEmail: removed.email,
+      type: ActivityType.accountRemoved,
+      description: 'User account removed by Administrator',
+    );
+  }
+
+  /// Toggles a user's status between Active and Suspended.
+  void toggleUserStatus(String userId) {
+    final index = users.indexWhere((u) => u.id == userId);
+    if (index == -1) return;
+
+    final current = users[index];
+    final nextStatus = current.status == UserStatus.suspended
+        ? UserStatus.active
+        : UserStatus.suspended;
+
+    final updated = current.copyWith(
+      status: nextStatus,
+      isCurrentlyOnline:
+          nextStatus == UserStatus.suspended ? false : current.isCurrentlyOnline,
+    );
+
+    users[index] = updated;
+    if (selectedUser.value?.id == userId) {
+      selectedUser.value = updated;
+    }
+    _applyUserFilters();
+
+    recordActivity(
+      userId: updated.id,
+      userName: updated.fullName,
+      userEmail: updated.email,
+      type: ActivityType.statusChanged,
+      description: nextStatus == UserStatus.suspended
+          ? 'Account suspended by Administrator'
+          : 'Account reactivated by Administrator',
+    );
+  }
+
+  // ──────────────────── LIVE SESSION & ACTIVITY HOOKS ────────────────────
+
+  /// Records a live login event when a user signs in.
+  void recordUserLogin({
+    required String email,
+    required String fullName,
+    UserRole role = UserRole.customer,
+  }) {
+    final now = DateTime.now();
+    final idx = users.indexWhere(
+      (u) => u.email.toLowerCase() == email.toLowerCase(),
+    );
+
+    String userId;
+    String name = fullName;
+
+    if (idx != -1) {
+      final existing = users[idx];
+      name = existing.fullName;
+      userId = existing.id;
+      users[idx] = existing.copyWith(
+        lastLoginAt: now,
+        isCurrentlyOnline: true,
+      );
+    } else {
+      userId = 'USR-${_nextUserCounter++}';
+      final created = AdminUserRecord(
+        id: userId,
+        fullName: fullName.isNotEmpty ? fullName : email.split('@').first,
+        email: email,
+        phone: '08012345678',
+        role: role,
+        status: UserStatus.active,
+        joinedAt: now,
+        lastLoginAt: now,
+        isCurrentlyOnline: true,
+      );
+      users.insert(0, created);
+    }
+
+    _applyUserFilters();
+    recordActivity(
+      userId: userId,
+      userName: name,
+      userEmail: email,
+      type: ActivityType.login,
+      description: 'User logged in to RESOLVA session',
+    );
+  }
+
+  /// Records a live logout event when a user signs out.
+  void recordUserLogout({required String email}) {
+    final now = DateTime.now();
+    final idx = users.indexWhere(
+      (u) => u.email.toLowerCase() == email.toLowerCase(),
+    );
+
+    if (idx != -1) {
+      final existing = users[idx];
+      users[idx] = existing.copyWith(
+        lastLogoutAt: now,
+        isCurrentlyOnline: false,
+      );
+      _applyUserFilters();
+
+      recordActivity(
+        userId: existing.id,
+        userName: existing.fullName,
+        userEmail: existing.email,
+        type: ActivityType.logout,
+        description: 'User logged out of RESOLVA session',
+      );
+    }
+  }
+
+  /// Appends an entry to the activity log.
+  void recordActivity({
+    required String userId,
+    required String userName,
+    required String userEmail,
+    required ActivityType type,
+    required String description,
+    double? amount,
+  }) {
+    final log = UserActivityLog(
+      id: 'ACT-${_nextLogCounter++}',
+      userId: userId,
+      userName: userName,
+      userEmail: userEmail,
+      type: type,
+      description: description,
+      timestamp: DateTime.now(),
+      ipOrDevice: 'Web Session • Active Device',
+      amount: amount,
+    );
+    activityLogs.insert(0, log);
+    _applyActivityFilters();
+  }
+}
+

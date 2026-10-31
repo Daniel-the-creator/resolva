@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../controllers/auth_controller.dart';
 import 'common_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -71,11 +73,7 @@ class ResolvaFooter extends StatelessWidget {
         ),
         Expanded(
           flex: 2,
-          child: _buildLinksSection('Account', [
-            _FooterLink('Login', '/login'),
-            _FooterLink('Create Account', '/register'),
-            _FooterLink('Dashboard', '/dashboard'),
-          ]),
+          child: Obx(() => _buildLinksSection('Account', _getAccountLinks())),
         ),
       ],
     );
@@ -99,13 +97,30 @@ class ResolvaFooter extends StatelessWidget {
           _FooterLink('FAQ', '/faq'),
         ]),
         const SizedBox(height: 24),
-        _buildLinksSection('Account', [
-          _FooterLink('Login', '/login'),
-          _FooterLink('Create Account', '/register'),
-          _FooterLink('Dashboard', '/dashboard'),
-        ]),
+        Obx(() => _buildLinksSection('Account', _getAccountLinks())),
       ],
     );
+  }
+
+  List<_FooterLink> _getAccountLinks() {
+    if (Get.isRegistered<AuthController>()) {
+      final auth = Get.find<AuthController>();
+      if (auth.isFullyAuthorized) {
+        if (auth.isAdmin.value) {
+          return const [
+            _FooterLink('Admin Portal', '/admin'),
+          ];
+        }
+        return const [
+          _FooterLink('Dashboard', '/dashboard'),
+          _FooterLink('My Orders', '/orders'),
+        ];
+      }
+    }
+    return const [
+      _FooterLink('Login', '/login'),
+      _FooterLink('Create Account', '/register'),
+    ];
   }
 
   Widget _buildBrandSection() {

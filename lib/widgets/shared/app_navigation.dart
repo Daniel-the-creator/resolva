@@ -76,11 +76,15 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // Single consolidated reactive section
                   Obx(() {
                     final isAuth = authController.isFullyAuthorized;
+                    final isAdmin = authController.isAdmin.value;
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (isAuth) ...[
-                          _buildNavItem('Dashboard', 4, '/dashboard'),
+                          if (isAdmin)
+                            _buildNavItem('Admin Panel', 5, '/admin')
+                          else
+                            _buildNavItem('Dashboard', 4, '/dashboard'),
                           const SizedBox(width: 12),
                           OutlinedButton.icon(
                             onPressed: () {
@@ -212,11 +216,16 @@ class ResolvaDrawer extends StatelessWidget {
                   _drawerItem(context, Icons.business_rounded, 'CAC Registration', '/cac'),
                   Obx(() {
                     if (authController.isFullyAuthorized) {
+                      final isAdmin = authController.isAdmin.value;
                       return Column(
                         children: [
                           const Divider(indent: 24, endIndent: 24),
-                          _drawerItem(context, Icons.dashboard_rounded, 'Dashboard', '/dashboard'),
-                          _drawerItem(context, Icons.receipt_long_rounded, 'My Orders', '/orders'),
+                          if (isAdmin)
+                            _drawerItem(context, Icons.admin_panel_settings_rounded, 'Admin Panel', '/admin')
+                          else ...[
+                            _drawerItem(context, Icons.dashboard_rounded, 'Dashboard', '/dashboard'),
+                            _drawerItem(context, Icons.receipt_long_rounded, 'My Orders', '/orders'),
+                          ],
                         ],
                       );
                     }

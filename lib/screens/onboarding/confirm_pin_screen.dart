@@ -71,11 +71,8 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
         ),
       );
 
-      // Navigate to originally requested service or dashboard
-      final destination = authController.intendedRoute.isNotEmpty
-          ? authController.intendedRoute
-          : '/dashboard';
-      authController.intendedRoute = '';
+      // Navigate to appropriate role destination
+      final destination = authController.getNextAuthRoute();
       widget.onNavigate(destination);
     } else {
       // Mismatch
